@@ -1,24 +1,16 @@
 from fastapi import FastAPI
-from pydantic import BaseModel
+from pymongo import MongoClient
 
 app = FastAPI()
 
-# ① トップページ（確認用）
-@app.get("/")
-def read_root():
-    return {"message": "AI Escape Game Server is running!"}
+MONGO_URL = "mongodb+srv://echo_user:Ocha0401@escape-of-echo.7d0wroy.mongodb.net/?appName=escape-of-echo"
+client = MongoClient(MONGO_URL)
 
-# ② Queryパラメータの例（/hello?name=ocha）
-@app.get("/hello")
-def say_hello(name: str = "world"):
-    return {"message": f"Hello, {name}!"}
+db = client["escape_of_echo_db"]
+players = db["players"]
 
-# ③ JSONデータを受け取る型（POST用）
-class Item(BaseModel):
-    name: str
-    description: str
-
-# ④ POST API（/item）
-@app.post("/item")
-def create_item(item: Item):
-    return {"received": item}
+@app.get("/testdb")
+def test_db():
+    test_data = {"name": "test_user", "status": "MongoDB connected!"}
+    result = players.insert_one(test_data)
+    return {"message": "Inserted", "id": str(result.inserted_id)}
